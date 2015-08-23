@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+# -----------------
+# =    MARKVAL    =
+# -----------------
+#
+# Markval is your one-stop shop for Markdown enforcing.
+#
+# This script iterates through all of the .md files in `git ls-files` and checks
+# for missing links. Right now it only checks links to files, and not URLs or
+# headings in files, though that functionality can be added down the line.
+#
+# It's still pretty janky, and will probably only work on Linux machines. If you
+# run into any issues or have any comments/questions/concerns, please file an
+# issue!
+
+URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+HAS_MISSING_LINK=false
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+errors=''
+
+IFS='
+'
+
+# This unholy line starts iterating through all of the .md files in `git
+# ls-files`. The crazy grep regex grabs the destination of all of the markdown
+# links, and then the sed at the end uses tabs as separators between the
+# filename, line number, and result instead of the default : in grep.
+#
+# Example line from this:
+#
+# ./cohort_4/playbook/SCHEDULE.md	22	ACTIVITIES.md#a-heading
+for line in $(git ls-files | grep '\.md$' | xargs grep -noP '\[.*\]\(\K.*?(?=\))' | sed -e 's/:/\t/' -e 's/:/\t/'); do
+  file=$(echo $line | cut -f1)
+  dir=$(dirname "$file")
+  line_num=$(echo $line | cut -f2)
+  link_dest=$(echo $line | cut -f3)
+  broken_link=true
+
+  # Only check if the link is not a URL and if it's not empty
+  if [[ ( ! $link_dest =~ $URL_REGEX ) ]]; then
+    link_dest_file=$(echo $link_dest | sed "s/#.*$//") # 'file.md' <- 'file.md#heading'
+    link_dest_heading=$(echo $link_dest | grep -o '#.*$') # '#heading' <- 'file.md#heading'
+    linked_path=$(readlink -f "$dir/$link_dest_file") # '/home/user/proj/file.md'
+
+    # If there's no link_dest_heading (the '#heading' part of 'file.md#heading')
+    if [[ -z "$link_dest_heading" ]]; then
+      # Check if the linked path is either an existing file or directory
+      if [[ ( -f "$linked_path" ) || ( -d "$linked_path" ) ]]; then
+        broken_link=false
+      fi
+    else
+      file_to_check=$file
+
+      # '#my-heading' -> 'my heading'
+      stripped_heading=$(echo $link_dest_heading | sed -e 's/#//' -e 's/-/ /g')
+
+      # If there's a filename in the link (the 'file.md' part of 'file.md#heading')
+      if [[ ! -z "$link_dest_file" ]]; then
+        file_to_check=$linked_path
+      fi
+
+      for match in $(
+          cat $file_to_check |
+            grep -i "^#\+" | # only headings
+            sed 's/-/ /g' | # replace dashes with spaces
+            tr -d '[:punct:]' | # remove all punctuation
+            sed -e 's/^ \+//' -e 's/ \+$//' -e 's/  \+/ /g' | # strip extra spaces
+            grep -io "^$stripped_heading\$"
+        ); do
+        broken_link=false
+      done
+    fi
+  else # if the link is a URL
+    broken_link=false
+  fi
+
+  if [ $broken_link = true ]; then
+    HAS_MISSING_LINK=true
+    echo -ne "${RED}x${NC}"
+    errors="${errors}\n${line_num}:${file} '${link_dest}' does not exist!"
+  else
+    echo -ne "${GREEN}.${NC}"
+  fi
+done
+
+# Final newline after all the test dots (or Xs)
+echo ''
+
+>&2 echo -e "$errors"
+
+if [ $HAS_MISSING_LINK = true ]; then
+  exit 1
+fi
+
+echo "No broken links!"
