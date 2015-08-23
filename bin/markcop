@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # -----------------
-# =    MARKVAL    =
+# =    MARKCOP    =
 # -----------------
 #
 # Markval is your one-stop shop for Markdown enforcing.
@@ -14,7 +14,7 @@
 # run into any issues or have any comments/questions/concerns, please file an
 # issue!
 
-URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*'[-A-Za-z0-9\+&@#/%=~_|]
 HAS_MISSING_LINK=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'

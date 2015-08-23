@@ -1,6 +1,6 @@
-# Markval
+# Markcop
 
-Markval is our friendly Markdown enforcer.
+Markcop is our friendly Markdown enforcer.
 
 ## License
 
