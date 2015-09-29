@@ -88,7 +88,8 @@ for line in $(git ls-files | grep '\.md$' | xargs grep -noP '[^\|].{80,}[^\|]$' 
   file_name=$(echo $line | cut -f1)
   line_num=$(echo $line | cut -f2)
   line_contents=$(echo $line | cut -f3)
-  if [[ ! $line_contents =~ ^.*$URL_REGEX.*$ ]]; then
+  # Check to make sure it isn't a link or HTML comment
+  if [[ ! $line_contents =~ ^.*$URL_REGEX.*$ && ! $line_contents =~ ^.*\<!--.*--\>.*$ && ! $(echo $line_contents | grep -noP '^(\ )*\[.*\]\(.*\)\W*$') ]]; then
     long_line=true
     HAS_ERROR=true
     printf "${RED}x${NC}"
