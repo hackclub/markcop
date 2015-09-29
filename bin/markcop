@@ -1,21 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 #
 # -----------------
 # =    MARKCOP    =
 # -----------------
 #
-# Markval is your one-stop shop for Markdown enforcing.
+# Markcop is your one-stop shop for Markdown enforcing.
 #
 # This script iterates through all of the .md files in `git ls-files` and checks
-# for missing links. Right now it only checks links to files, and not URLs or
-# headings in files, though that functionality can be added down the line.
+# that everything follows our markdown style guidelines at
+# https://github.com/hackedu/meta/blob/master/markdown_style_guide.md
 #
 # It's still pretty janky, and will probably only work on Linux machines. If you
 # run into any issues or have any comments/questions/concerns, please file an
 # issue!
 
 URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
-HAS_MISSING_LINK=false
+HAS_ERROR=false
+HAS_BAD_HEADING=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
@@ -25,6 +26,81 @@ errors=''
 IFS='
 '
 
+# Check for trailing whitespace
+printf '\n\nChecking for trailing whitespace...\n'
+
+for line in $(git ls-files | grep '\.md$' | xargs grep -noP '^.+\s{3,}$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
+  file_name=$(echo $line | cut -f1)
+  line_num=$(echo $line | cut -f2)
+  line_contents=$(echo $line | cut -f3)
+  HAS_ERROR=true
+  trailing_whitespace=true
+  printf "${RED}x${NC}"
+  errors="${errors}\n${line_num}:${file_name} '$line_contents' has trailing whitespace!"
+done
+
+if [[ ! $trailing_whitespace = true ]]; then
+  printf "${GREEN}.${NC}\nNo trailing whitespace!"
+fi
+
+# Check that headings have proper formatting
+printf '\n\nChecking for incorrect headings...\n'
+
+# Make sure to ignore lines that end with '{' because they might be css ID selectors
+for line in $(git ls-files | grep '\.md$' | xargs grep -noP '^\#[^\{]*$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
+  bad_heading=false
+  file_name=$(echo $line | cut -f1)
+  line_num=$(echo $line | cut -f2)
+  line_contents=$(echo $line | cut -f3)
+  if [[ $line_contents =~ ^\#{1,6}[^\ \#].*$ ]]; then
+    bad_heading=true
+    HAS_BAD_HEADING=true
+    printf "${RED}x${NC}"
+    errors="${errors}\n${line_num}:${file_name} '${line_contents}' doesn't have a space between the # and the text of the header!"
+  fi
+  if [[ $line_contents =~ ^\#{7,}.*$ ]]; then
+    bad_heading=true
+    HAS_BAD_HEADING=true
+    printf "${RED}x${NC}"
+    errors="${errors}\n${line_num}:${file_name} '${line_contents}' is a header indented more than 6 levels!"
+  fi
+  if [[ $line_contents =~ ^.+\#[\ ]*$ ]]; then
+    bad_heading=true
+    HAS_BAD_HEADING=true
+    printf "${RED}x${NC}"
+    errors="${errors}\n${line_num}:${file_name} '${line_contents}' is a header with a closing #!"
+  fi
+  if [ $bad_heading = false ]; then
+    printf "${GREEN}.${NC}"
+  fi
+done
+
+if [[ $HAS_BAD_HEADING = false ]]; then
+  printf "${GREEN}.${NC}\nNo bad headings!"
+else
+  HAS_ERROR=true
+fi
+
+# Check for any lines over 80 characters
+printf '\n\nChecking for long lines...\n'
+
+for line in $(git ls-files | grep '\.md$' | xargs grep -noP '[^\|].{80,}[^\|]$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
+  file_name=$(echo $line | cut -f1)
+  line_num=$(echo $line | cut -f2)
+  line_contents=$(echo $line | cut -f3)
+  if [[ ! $line_contents =~ ^.*$URL_REGEX.*$ ]]; then
+    long_line=true
+    HAS_ERROR=true
+    printf "${RED}x${NC}"
+    errors="${errors}\n${line_num}:${file_name} is over 80 chars!"
+  fi
+done
+
+if [[ ! $long_line = true ]]; then
+  printf "${GREEN}.${NC}\nNo long lines!"
+fi
+
+# Check for any links that don't resolve
 # This unholy line starts iterating through all of the .md files in `git
 # ls-files`. The crazy grep regex grabs the destination of all of the markdown
 # links, and then the sed at the end uses tabs as separators between the
@@ -33,6 +109,7 @@ IFS='
 # Example line from this:
 #
 # ./cohort_4/playbook/SCHEDULE.md	22	ACTIVITIES.md#a-heading
+printf '\n\nChecking for missing links...\n'
 for line in $(git ls-files | grep '\.md$' | xargs grep -noP '\[.*\]\(\K.*?(?=\))' | sed -e 's/:/\t/' -e 's/:/\t/'); do
   file=$(echo $line | cut -f1)
   dir=$(dirname "$file")
@@ -79,21 +156,21 @@ for line in $(git ls-files | grep '\.md$' | xargs grep -noP '\[.*\]\(\K.*?(?=\))
   fi
 
   if [ $broken_link = true ]; then
-    HAS_MISSING_LINK=true
-    echo -ne "${RED}x${NC}"
+    missing_link=true
+    HAS_ERROR=true
+    printf "${RED}x${NC}"
     errors="${errors}\n${line_num}:${file} '${link_dest}' does not exist!"
   else
-    echo -ne "${GREEN}.${NC}"
+    printf "${GREEN}.${NC}"
   fi
 done
 
-# Final newline after all the test dots (or Xs)
-echo ''
-
->&2 echo -e "$errors"
-
-if [ $HAS_MISSING_LINK = true ]; then
-  exit 1
+if [[ ! $missing_link = true ]]; then
+  printf '\nNo broken links!'
 fi
 
-echo "No broken links!"
+>&2 printf "\n\n$errors\n"
+
+if [ $HAS_ERROR=true ]; then
+  exit 1
+fi
