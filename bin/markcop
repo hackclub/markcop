@@ -16,7 +16,6 @@
 
 URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 HAS_ERROR=false
-HAS_BAD_HEADING=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
@@ -41,155 +40,145 @@ cat <<'EOF'
 
 EOF
 
-# Check for trailing whitespace
-printf 'Checking for trailing whitespace...\n'
+function trailing_whitespace {
+  file_name="$1"
+  trailing_whitespace_errors_in_file=false
+  trailing_whitespace_regex='^.+\s{3,}$'
+  for line in $(echo "$2" | grep -oP $trailing_whitespace_regex | sed -e 's/:/\t/'); do
+    trailing_whitespace_errors_in_file=true
+    line_num=$(echo "$line" | cut -f1)
+    line_contents=$(echo $line | cut -f2)
+    errors="${errors}\n${file_name}:${line_num} has trailing whitespace!"
+  done
 
-for line in $(git ls-files | grep '\.md$' | xargs grep -noP '^.+\s{3,}$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
-  file_name=$(echo $line | cut -f1)
-  line_num=$(echo $line | cut -f2)
-  line_contents=$(echo $line | cut -f3)
-  HAS_ERROR=true
-  trailing_whitespace=true
-  printf "${RED}x${NC}"
-  errors="${errors}\n${line_num}:${file_name} '$line_contents' has trailing whitespace!"
-done
-
-if [[ ! $trailing_whitespace = true ]]; then
-  printf "${GREEN}.${NC}\nNo trailing whitespace!"
-fi
-
-# Check that headings have proper formatting
-printf '\n\nChecking for incorrect headings...\n'
-
-# Make sure to ignore lines that end with '{' because they might be css ID selectors
-for line in $(git ls-files | grep '\.md$' | xargs grep -noP '^\#[^\{]*$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
-  bad_heading=false
-  file_name=$(echo $line | cut -f1)
-  line_num=$(echo $line | cut -f2)
-  line_contents=$(echo $line | cut -f3)
-  if [[ $line_contents =~ ^\#{1,6}[^\ \#].*$ ]]; then
-    bad_heading=true
-    HAS_BAD_HEADING=true
-    printf "${RED}x${NC}"
-    errors="${errors}\n${line_num}:${file_name} '${line_contents}' doesn't have a space between the # and the text of the header!"
+  if [ $trailing_whitespace_errors_in_file = true ]; then
+    return 1
   fi
-  if [[ $line_contents =~ ^\#{7,}.*$ ]]; then
-    bad_heading=true
-    HAS_BAD_HEADING=true
-    printf "${RED}x${NC}"
-    errors="${errors}\n${line_num}:${file_name} '${line_contents}' is a header indented more than 6 levels!"
-  fi
-  if [[ $line_contents =~ ^.+\#[\ ]*$ ]]; then
-    bad_heading=true
-    HAS_BAD_HEADING=true
-    printf "${RED}x${NC}"
-    errors="${errors}\n${line_num}:${file_name} '${line_contents}' is a header with a closing #!"
-  fi
-  if [ $bad_heading = false ]; then
-    printf "${GREEN}.${NC}"
-  fi
-done
 
-if [[ $HAS_BAD_HEADING = false ]]; then
-  printf "${GREEN}.${NC}\nNo bad headings!"
-else
-  HAS_ERROR=true
-fi
+  return 0
+}
 
-# Check for any lines over 80 characters
-printf '\n\nChecking for long lines...\n'
-
-for line in $(git ls-files | grep '\.md$' | xargs grep -noP '[^\|].{80,}[^\|]$' | sed -e 's/:/\t/' -e 's/:/\t/'); do
-  file_name=$(echo $line | cut -f1)
-  line_num=$(echo $line | cut -f2)
-  line_contents=$(echo $line | cut -f3)
-
-  # Check to make sure the line doesn't contain a link or HTML comment
-  html_comment_regex='^<!--.*-->$'
-  markdown_link_at_end_of_line_regex='\[.*\]\(.*\)\W*$'
-  if [[ ! $line_contents =~ $URL_REGEX && ! $line_contents =~ $html_comment_regex && ! $line_contents =~ $markdown_link_at_end_of_line_regex ]]; then
-    long_line=true
-    HAS_ERROR=true
-    printf "${RED}x${NC}"
-    errors="${errors}\n${line_num}:${file_name} is over 80 chars!"
-  fi
-done
-
-if [[ ! $long_line = true ]]; then
-  printf "${GREEN}.${NC}\nNo long lines!"
-fi
-
-# Check for any links that don't resolve
-# This unholy line starts iterating through all of the .md files in `git
-# ls-files`. The crazy grep regex grabs the destination of all of the markdown
-# links, and then the sed at the end uses tabs as separators between the
-# filename, line number, and result instead of the default : in grep.
-#
-# Example line from this:
-#
-# ./cohort_4/playbook/SCHEDULE.md	22	ACTIVITIES.md#a-heading
-printf '\n\nChecking for missing links...\n'
-for line in $(git ls-files | grep '\.md$' | xargs grep -noP '\[.*\]\(\K.*?(?=\))' | sed -e 's/:/\t/' -e 's/:/\t/'); do
-  file=$(echo $line | cut -f1)
-  dir=$(dirname "$file")
-  line_num=$(echo $line | cut -f2)
-  link_dest=$(echo $line | cut -f3)
-  broken_link=true
-
-  # Only check if the link is not a URL and if it's not empty
-  if [[ ( ! $link_dest =~ $URL_REGEX ) ]]; then
-    link_dest_file=$(echo $link_dest | sed "s/#.*$//") # 'file.md' <- 'file.md#heading'
-    link_dest_heading=$(echo $link_dest | grep -o '#.*$') # '#heading' <- 'file.md#heading'
-    linked_path=$(readlink -f "$dir/$link_dest_file") # '/home/user/proj/file.md'
-
-    # If there's no link_dest_heading (the '#heading' part of 'file.md#heading')
-    if [[ -z "$link_dest_heading" ]]; then
-      # Check if the linked path is either an existing file or directory
-      if [[ ( -f "$linked_path" ) || ( -d "$linked_path" ) ]]; then
-        broken_link=false
-      fi
-    else
-      file_to_check=$file
-
-      # '#my-heading' -> 'my heading'
-      stripped_heading=$(echo $link_dest_heading | sed -e 's/#//' -e 's/-/ /g')
-
-      # If there's a filename in the link (the 'file.md' part of 'file.md#heading')
-      if [[ ! -z "$link_dest_file" ]]; then
-        file_to_check=$linked_path
-      fi
-
-      for match in $(
-          cat $file_to_check |
-            grep -i "^#\+" | # only headings
-            sed 's/-/ /g' | # replace dashes with spaces
-            tr -d '[:punct:]' | # remove all punctuation
-            sed -e 's/^ \+//' -e 's/ \+$//' -e 's/  \+/ /g' | # strip extra spaces
-            grep -io "^$stripped_heading\$"
-        ); do
-        broken_link=false
-      done
+function malformed_header {
+  file_name="$1"
+  malformed_header_in_file=false
+  header_regex='^[0-9]+:#[^\{]*$'
+  for line in $(echo "$2" | grep -oP $header_regex | sed -e 's/:/\t/'); do
+    line_num=$(echo "$line" | cut -f1)
+    line_contents=$(echo $line | cut -f2)
+    # Check that there is a space between the # and the header
+    header_missing_space_after_hashtag_regex='^\#{1,6}[^\ \#].*$'
+    if [[ "$line_contents" =~ $header_missing_space_after_hashtag_regex ]]; then
+      malformed_header_in_file=true
+      errors="${errors}\n${file_name}:${line_num} doesn't have a space between the # and the text of the header!"
     fi
-  else # if the link is a URL
-    broken_link=false
+    # Check to see if a header is indented over 6 levels
+    header_indented_over_6_levels_regex='^\#{7,}.*$'
+    if [[ "$line_contents" =~ $header_indented_over_6_levels_regex ]]; then
+      malformed_header_in_file=true
+      errors="${errors}\n${file_name}:${line_num} is a header indented more than 6 levels!"
+    fi
+    # Check that the header doesn't end with a closing #
+    header_ending_with_hashtag_regex='^.+\#[\ ]*$'
+    if [[ "$line_contents" =~ $header_ending_with_hashtag_regex ]]; then
+      malformed_header_in_file=true
+      errors="${errors}\n${file_name}:${line_num} is a header with a closing #!"
+    fi
+  done
+
+  if [ $malformed_header_in_file = true ]; then
+    return 1
   fi
 
-  if [ $broken_link = true ]; then
-    missing_link=true
-    HAS_ERROR=true
-    printf "${RED}x${NC}"
-    errors="${errors}\n${file}:${line_num} '${link_dest}' is not a valid link!"
-  else
-    printf "${GREEN}.${NC}"
+  return 0
+}
+
+function long_line {
+  file_name="$1"
+  long_line_in_file=false
+  long_line_regex='^[0-9]+:[^\|].{80,}[^\|]$'
+  for line in $(echo "$2" | grep -oP $long_line_regex | sed -e 's/:/\t/'); do
+    line_contents=$(echo $line | cut -f2)
+    # Check to make sure the line doesn't contain a link or HTML comment
+    html_comment_regex='^\<!--.*--\>$'
+    markdown_link_at_end_of_line_regex='\[.*\]\(.*\)\W*$'
+    if [[ ! $line_contents =~ $URL_REGEX && ! $line_contents =~ $html_comment_regex && ! $line_contents =~ $markdown_link_at_end_of_line_regex ]]; then
+      line_num=$(echo "$line" | cut -f1)
+      long_line_in_file=true
+      errors="${errors}\n${file_name}:${line_num} is over 80 chars!"
+    fi
+  done
+
+  if [ $long_line_in_file = true ]; then
+    return 1
   fi
+
+  return 0
+}
+
+function missing_link {
+  file_name="$1"
+  link_line_regex='[0-9]+:\[.*\]\(.*?(?=\))'
+  for line in $(echo "$2" | grep -oP $link_line_regex); do
+    line_num=$(echo $line | cut -f1)
+    dir=$(dirname "$file_name")
+    link_dest=$(echo $line | grep -oP '\[.*\]\(\K.*')
+    broken_link=true
+
+    # Only check if the link is not a URL and if it's not empty
+    if [[ ( ! $link_dest =~ $URL_REGEX ) ]]; then
+      link_dest_file=$(echo $link_dest | sed "s/#.*$//") # 'file.md' <- 'file.md#heading'
+      link_dest_heading=$(echo $link_dest | grep -o '#.*$') # '#heading' <- 'file.md#heading'
+      linked_path=$(readlink -f "$dir/$link_dest_file") # '/home/user/proj/file.md'
+
+      # If there's no link_dest_heading (the '#heading' part of 'file.md#heading')
+      if [[ -z "$link_dest_heading" ]]; then
+        # Check if the linked path is either an existing file or directory
+        if [[ ( -f "$linked_path" ) || ( -d "$linked_path" ) ]]; then
+          broken_link=false
+        fi
+      else
+        file_to_check=$file_name
+
+        # If there's a filename in the link (the 'file.md' part of 'file.md#heading')
+        if [[ ! -z "$link_dest_file" ]]; then
+          file_to_check=$linked_path
+        fi
+
+        # '#my-heading' -> 'my heading'
+        stripped_heading=$(echo $link_dest_heading | sed -e 's/#//' -e 's/-/ /g')
+
+        for match in $(
+                      cat $file_to_check |
+                        grep -i "^#\+" | # only headings
+                        sed 's/-/ /g' | # replace dashes with spaces
+                        tr -d '[:punct:]' | # remove all punctuation
+                        sed -e 's/^ \+//' -e 's/ \+$//' -e 's/  \+/ /g' | # strip extra spaces
+                        grep -io "^$stripped_heading\$"
+                    ); do
+          broken_link=false
+        done
+      fi
+    else # if the link is a URL
+      broken_link=false
+    fi
+
+    if [ $broken_link = true ]; then
+      errors="${errors}\n${file}:${line_num} '${link_dest}' is not a valid link!"
+    fi
+  done
+}
+
+for file in $(git ls-files | grep '\.md$'); do
+  content=$(grep -n "" $file)
+  # $content is in the format file:line_number:line
+  trailing_whitespace "$file" "$content"
+  malformed_header "$file" "$content"
+  long_line "$file" "$content"
+  missing_link "$file" "$content"
 done
-
-if [[ ! $missing_link = true ]]; then
-  printf '\nNo broken links!'
-fi
 
 >&2 printf "\n\n$errors\n"
 
-if [ $HAS_ERROR = true ]; then
+if [ ! -n "$error" ]; then
   exit 1
 fi
