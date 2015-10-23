@@ -103,8 +103,11 @@ for line in $(git ls-files | grep '\.md$' | xargs grep -noP '[^\|].{80,}[^\|]$' 
   file_name=$(echo $line | cut -f1)
   line_num=$(echo $line | cut -f2)
   line_contents=$(echo $line | cut -f3)
-  # Check to make sure it isn't a link or HTML comment
-  if [[ ! $line_contents =~ ^.*$URL_REGEX.*$ && ! $line_contents =~ ^.*\<!--.*--\>.*$ && ! $(echo $line_contents | grep -noP '^(\ )*\[.*\]\(.*\)\W*$') ]]; then
+
+  # Check to make sure the line doesn't contain a link or HTML comment
+  html_comment_regex='^\<!--.*--\>$'
+  markdown_link_at_end_of_line_regex='\[.*\]\(.*\)\W*$'
+  if [[ ! $line_contents =~ $URL_REGEX && ! $line_contents =~ $html_comment_regex && ! $line_contents =~ $markdown_link_at_end_of_line_regex ]]; then
     long_line=true
     HAS_ERROR=true
     printf "${RED}x${NC}"
