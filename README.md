@@ -1,4 +1,4 @@
-# Markcop
+# Markcop [![Circle CI](https://circleci.com/gh/hackedu/markcop.svg?style=svg)](https://circleci.com/gh/hackedu/markcop)
 
 Markcop is our friendly Markdown enforcer.
 
