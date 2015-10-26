@@ -4,7 +4,11 @@ Markcop is our friendly Markdown enforcer.
 
 ## Running It
 
-Copy and paste the following into your terminal:
+Copy and paste the following into your terminal (must have Docker installed):
+
+    docker run -v $(pwd):/app hackedu/markcop
+
+If you'd rather run it directly without docker, run the following:
 
     curl -sL https://git.io/vswrY | bash
 
