@@ -178,7 +178,7 @@ for line in $(git ls-files | grep '\.md$' | xargs grep -noP '\[.*\]\(\K.*?(?=\))
     missing_link=true
     HAS_ERROR=true
     printf "${RED}x${NC}"
-    errors="${errors}\n${line_num}:${file} '${link_dest}' is not a valid link!"
+    errors="${errors}\n${file}:${line_num} '${link_dest}' is not a valid link!"
   else
     printf "${GREEN}.${NC}"
   fi
