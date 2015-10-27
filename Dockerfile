@@ -1,7 +1,7 @@
 FROM progrium/busybox
 
 RUN opkg-install bash grep git
-COPY bin/markcop /usr/local/bin/markcop
+COPY bin/markcop /markcop/markcop
 WORKDIR /app
 
-ENTRYPOINT ["markcop"]
+ENTRYPOINT ["/markcop/markcop"]
