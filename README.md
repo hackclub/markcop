@@ -16,6 +16,13 @@ If you're worried about piping from the internet to bash (which you should be),
 you can run Markcop manually by downloading `bin/markcop` and running it
 manually.
 
+## Development
+
+Run the following to run Markcop in its Docker container in development (make
+sure to run this from the root of the repo):
+
+    docker run -v $(pwd):/app -v $(pwd)/bin:/markcop hackedu/markcop
+
 ## License
 
 See [LICENSE](LICENSE).
