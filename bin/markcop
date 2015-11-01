@@ -169,7 +169,7 @@ function missing_link {
 }
 
 for file in $(git ls-files | grep '\.md$'); do
-  content=$(grep -n "" $file)
+  content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
   # $content is in the format file:line_number:line
   trailing_whitespace "$file" "$content"
   malformed_header "$file" "$content"
