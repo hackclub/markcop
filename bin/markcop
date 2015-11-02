@@ -19,7 +19,11 @@ HAS_ERROR=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
-CHECKS=(trailing_whitespace malformed_header long_line missing_link)
+CHECKS=(trailing_whitespace
+        malformed_header
+        header_missing_newline
+        long_line
+        missing_link)
 
 errors=''
 
@@ -89,6 +93,29 @@ function malformed_header {
   done
 
   if [ $malformed_header_in_file = true ]; then
+    printf "${RED}x${NC}"
+    return 1
+  fi
+
+  printf "${GREEN}.${NC}"
+  return 0
+}
+
+function header_missing_newline {
+  file_name="$1"
+  header_missing_newline_in_file=false
+  # Find headers with non-empty trailing or leading lines
+  header_without_trailing_or_leading_line_regex="([0-9]+\:\#.+$\n[0-9]+\:.+|[0-9]+\:.+\n^[0-9]+\:\#.+)"
+  for line in $(echo "$2" | grep -zoP $header_without_trailing_or_leading_line_regex); do
+    line_number_regex="[0-9]+(?=\:\#)"
+    line_num=$(echo $line | grep -oP $line_number_regex)
+    if [[ -n "$line_num" ]]; then
+      header_missing_newline_in_file=true
+      errors="${errors}\n${file_name}:${line_num} is missing a newline before or after the heading!"
+    fi
+  done
+
+  if [ $header_missing_newline_in_file = true ]; then
     printf "${RED}x${NC}"
     return 1
   fi
