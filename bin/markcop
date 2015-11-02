@@ -19,6 +19,7 @@ HAS_ERROR=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
+CHECKS=(trailing_whitespace malformed_header long_line missing_link)
 
 errors=''
 
@@ -48,6 +49,7 @@ function trailing_whitespace {
     trailing_whitespace_errors_in_file=true
     line_num=$(echo "$line" | cut -f1)
     line_contents=$(echo $line | cut -f2)
+    printf "${RED}x${NC}"
     errors="${errors}\n${file_name}:${line_num} has trailing whitespace!"
   done
 
@@ -55,6 +57,7 @@ function trailing_whitespace {
     return 1
   fi
 
+  printf "${GREEN}.${NC}"
   return 0
 }
 
@@ -86,9 +89,11 @@ function malformed_header {
   done
 
   if [ $malformed_header_in_file = true ]; then
+    printf "${RED}x${NC}"
     return 1
   fi
 
+  printf "${GREEN}.${NC}"
   return 0
 }
 
@@ -109,9 +114,11 @@ function long_line {
   done
 
   if [ $long_line_in_file = true ]; then
+    printf "${RED}x${NC}"
     return 1
   fi
 
+  printf "${GREEN}.${NC}"
   return 0
 }
 
@@ -163,18 +170,22 @@ function missing_link {
     fi
 
     if [ $broken_link = true ]; then
+      printf "${RED}x${NC}"
       errors="${errors}\n${file}:${line_num} '${link_dest}' is not a valid link!"
+    else
+      printf "${GREEN}.${NC}"
     fi
+
   done
 }
 
-for file in $(git ls-files | grep '\.md$'); do
-  content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
-  # $content is in the format file:line_number:line
-  trailing_whitespace "$file" "$content"
-  malformed_header "$file" "$content"
-  long_line "$file" "$content"
-  missing_link "$file" "$content"
+for check in "${CHECKS[@]}"; do
+  printf "\n\nRunning check: $check...\n"
+  for file in $(git ls-files | grep '\.md$'); do
+    content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
+    # $content is in the format file:line_number:line
+    $check "$file" "$content"
+  done
 done
 
 >&2 printf "\n\n$errors\n"
