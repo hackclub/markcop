@@ -190,6 +190,6 @@ done
 
 >&2 printf "\n\n$errors\n"
 
-if [ ! -n "$error" ]; then
+if [ ! -n "$errors" ]; then
   exit 1
 fi
