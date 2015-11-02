@@ -104,7 +104,7 @@ function long_line {
   for line in $(echo "$2" | grep -oP $long_line_regex | sed -e 's/:/\t/'); do
     line_contents=$(echo $line | cut -f2)
     # Check to make sure the line doesn't contain a link or HTML comment
-    html_comment_regex='^\<!--.*--\>$'
+    html_comment_regex='^<!--.*-->$'
     markdown_link_at_end_of_line_regex='\[.*\]\(.*\)\W*$'
     if [[ ! $line_contents =~ $URL_REGEX && ! $line_contents =~ $html_comment_regex && ! $line_contents =~ $markdown_link_at_end_of_line_regex ]]; then
       line_num=$(echo "$line" | cut -f1)
