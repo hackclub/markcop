@@ -23,7 +23,8 @@ CHECKS=(trailing_whitespace
         malformed_header
         header_missing_newline
         long_line
-        missing_link)
+        missing_link
+        eof_newline)
 
 errors=''
 
@@ -204,6 +205,20 @@ function missing_link {
     fi
 
   done
+}
+
+function eof_newline {
+  local file_name="$1"
+  local last_byte=$(tail -c 1 $file_name)
+
+  # If the last byte is an empty string, then there's a newline at the end of
+  # the file. If not, the file doesn't end in a newline.
+  if [ "$last_byte" != "" ]; then
+    printf "${RED}x${NC}"
+    errors="${errors}\n${file} doesn't end in a newline"
+  else
+    printf "${GREEN}.${NC}"
+  fi
 }
 
 for check in "${CHECKS[@]}"; do
