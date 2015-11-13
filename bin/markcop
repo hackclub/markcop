@@ -46,6 +46,8 @@ cat <<'EOF'
 
 EOF
 
+# Markdown checking functions
+
 function trailing_whitespace {
   file_name="$1"
   trailing_whitespace_errors_in_file=false
@@ -221,6 +223,8 @@ function eof_newline {
   fi
 }
 
+# Run through each function in the CHECKS array, passing each $file and
+# $contents
 for check in "${CHECKS[@]}"; do
   printf "\n\nRunning check: $check...\n"
   for file in $(git ls-files | grep '\.md$'); do

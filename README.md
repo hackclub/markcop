@@ -10,6 +10,8 @@ This is a guide to creating your own check.
    file contents as the second
 
    ```bash
+   # Markdown checking functions
+
    function my_check {
      file_name="$1"
      my_check_errors_in_file=false
