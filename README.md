@@ -4,7 +4,10 @@ Markcop is our friendly Markdown enforcer.
 
 ## Contributing
 
-This is a guide to creating your own check.
+To make your first contribution to a hackEDU repo, please read over
+[our contribution guidelines](https://github.com/hackedu/hackedu/blob/master/CONTRIBUTING.md).
+
+The following is a guide for contributing a new markdown test to this repo.
 
 1. Add a function that takes the file name as the its first argument, and the
    file contents as the second
