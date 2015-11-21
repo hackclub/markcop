@@ -1,4 +1,4 @@
-# Markcop [![Circle CI](https://circleci.com/gh/hackedu/markcop.svg?style=svg)](https://circleci.com/gh/hackedu/markcop)
+# Markcop [![Circle CI](https://circleci.com/gh/hackclub/markcop.svg?style=svg)](https://circleci.com/gh/hackclub/markcop)
 
 Markcop is our friendly Markdown enforcer.
 
@@ -6,7 +6,7 @@ Markcop is our friendly Markdown enforcer.
 
 Copy and paste the following into your terminal (must have Docker installed):
 
-    docker run -v $(pwd):/app hackedu/markcop
+    docker run -v $(pwd):/app hackclub/markcop
 
 If you'd rather run it directly without docker, run the following:
 
@@ -21,7 +21,7 @@ manually.
 Run the following to run Markcop in its Docker container in development (make
 sure to run this from the root of the repo):
 
-    docker run -v $(pwd):/app -v $(pwd)/bin:/markcop hackedu/markcop
+    docker run -v $(pwd):/app -v $(pwd)/bin:/markcop hackclub/markcop
 
 ## License
 
