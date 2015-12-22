@@ -8,7 +8,7 @@
 #
 # This script iterates through all of the .md files in `git ls-files` and checks
 # that everything follows our markdown style guidelines at
-# https://github.com/hackclub/meta/blob/master/markdown_style_guide.md
+# https://github.com/hackclub/meta/blob/master/styleguides/markdown.md
 #
 # It's still pretty janky, and will probably only work on Linux machines. If you
 # run into any issues or have any comments/questions/concerns, please file an
