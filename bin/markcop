@@ -24,6 +24,7 @@ CHECKS=(trailing_whitespace
         header_missing_newline
         long_line
         missing_link
+        missing_reference
         eof_newline)
 
 errors=''
@@ -159,53 +160,46 @@ function missing_link {
     line_num=$(echo $line | cut -f1)
     dir=$(dirname "$file_name")
     link_dest=$(echo $line | sed 's/.*\[.*\](\(.*\))/\1/')
-    broken_link=true
 
-    # Only check if the link is not a URL and if it's not empty
-    if [[ ( ! $link_dest =~ $URL_REGEX ) ]]; then
-      link_dest_file=$(echo $link_dest | sed "s/#.*$//") # 'file.md' <- 'file.md#heading'
-      link_dest_heading=$(echo $link_dest | grep -o '#.*$') # '#heading' <- 'file.md#heading'
-      linked_path=$(readlink -f "$dir/$link_dest_file") # '/home/user/proj/file.md'
-
-      # If there's no link_dest_heading (the '#heading' part of 'file.md#heading')
-      if [[ -z "$link_dest_heading" ]]; then
-        # Check if the linked path is either an existing file or directory
-        if [[ ( -f "$linked_path" ) || ( -d "$linked_path" ) ]]; then
-          broken_link=false
-        fi
-      else
-        file_to_check=$file_name
-
-        # If there's a filename in the link (the 'file.md' part of 'file.md#heading')
-        if [[ ! -z "$link_dest_file" ]]; then
-          file_to_check=$linked_path
-        fi
-
-        # '#my-heading' -> 'my heading'
-        stripped_heading=$(echo $link_dest_heading | sed -e 's/#//' -e 's/-/ /g')
-
-        for match in $(
-                      cat $file_to_check |
-                        grep -i "^#\+" | # only headings
-                        sed 's/-/ /g' | # replace dashes with spaces
-                        tr -d '[:punct:]' | # remove all punctuation
-                        sed -e 's/^ \+//' -e 's/ \+$//' -e 's/  \+/ /g' | # strip extra spaces
-                        grep -io "^$stripped_heading\$"
-                    ); do
-          broken_link=false
-        done
-      fi
-    else # if the link is a URL
-      broken_link=false
-    fi
-
-    if [ $broken_link = true ]; then
+    if [ $(is_broken_link $link_dest $file_name) = 1 ]; then
       printf "${RED}x${NC}"
       errors="${errors}\n${file}:${line_num} '${link_dest}' is not a valid link!"
     else
       printf "${GREEN}.${NC}"
     fi
 
+  done
+}
+
+function missing_reference {
+  link_line_regex='!?\[([^\]]*)\]\[([^)"]+)(?: \"([^\"]+)\")?\]'
+  file_name="$1"
+
+  for line in $(echo "$2" | grep -noP $link_line_regex); do
+    line_num=$(echo $line | perl -pe 's|(.*)\:\[.*?\]\[.*\]|\1|')
+    reference=$(echo $line | perl -pe 's|.*\[.*?\]\[(.*)\]|\1|')
+    reference_line_regex='\[.*\]\:.*'
+    found="no"
+
+    for other_line in $(echo "$2" | grep -noP $reference_line_regex); do
+      reference_regex="s|(.*)\[(.*?)\]\:\s*(.*)|"
+      reference_match=$(echo $other_line | perl -pe $(echo "$reference_regex\2|"))
+
+      if [ $reference_match = $reference ]; then
+        link_dest=$(echo $other_line | perl -pe $(echo "$reference_regex\3|"))
+
+        if [ $(is_broken_link $link_dest $file_name) ]; then
+          printf "${GREEN}.${NC}"
+          found="yes"
+          break
+        fi
+      fi
+  done
+
+  if [ $found = "no" ]; then
+    printf "${RED}x${NC}"
+    errors="${errors}\n${file}:${line_num} '${reference}' does not have a corresponding reference!"
+  fi
   done
 }
 
@@ -221,6 +215,54 @@ function eof_newline {
   else
     printf "${GREEN}.${NC}"
   fi
+}
+
+function is_broken_link {
+  link_dest=$1
+  file_name=$2
+  broken_link=1
+
+  # Only check if the link is not a URL and if it's not empty
+  if [[ ( ! $link_dest =~ $URL_REGEX ) ]]; then
+    link_dest_file=$(echo $link_dest | sed "s/#.*$//") # 'file.md' <- 'file.md#heading'
+    link_dest_heading=$(echo $link_dest | grep -o '#.*$') # '#heading' <- 'file.md#heading'
+    linked_path=$(readlink -f "$dir/$link_dest_file") # '/home/user/proj/file.md'
+
+    # If there's no link_dest_heading (the '#heading' part of 'file.md#heading')
+    if [[ -z "$link_dest_heading" ]]; then
+      # Check if the linked path is either an existing file or directory
+      if [[ ( -f "$linked_path" ) || ( -d "$linked_path" ) ]]; then
+        broken_link=0
+      fi
+    else
+      file_to_check=$file_name
+
+      # If there's a filename in the link (the 'file.md' part of 'file.md#heading')
+      if [[ ! -z "$link_dest_file" ]]; then
+        file_to_check=$linked_path
+      fi
+
+      # '#my-heading' -> 'my heading'
+      stripped_heading=$(echo $link_dest_heading | sed -e 's/#//' -e 's/-/ /g')
+
+      for match in $(
+                    cat $file_to_check |
+                      grep -i "^#\+" | # only headings
+                      sed 's/-/ /g' | # replace dashes with spaces
+                      tr -d '[:punct:]' | # remove all punctuation
+                      sed -e 's/^ \+//' -e 's/ \+$//' -e 's/  \+/ /g' | # strip extra spaces
+                      grep -io "^$stripped_heading\$"
+                  ); do
+        broken_link=0
+      done
+    fi
+  else # if the link is a URL
+    broken_link=0
+  fi
+
+  echo $broken_link "broken link"
+
+  return $broken_link
 }
 
 # Run through each function in the CHECKS array, passing each $file and
