@@ -24,7 +24,9 @@ CHECKS=(trailing_whitespace
         header_missing_newline
         long_line
         missing_link
-        eof_newline)
+        eof_newline
+        spellcheck
+       )
 
 errors=''
 
@@ -221,6 +223,28 @@ function eof_newline {
   else
     printf "${GREEN}.${NC}"
   fi
+}
+
+function spellcheck {
+  local file="$1"
+  local spelling_errors_in_file=false
+
+  for line in $(grep -n "" $file| sed -e 's/:/\t/' -e 's/^#//' -e 's/`.*`//'); do
+    local line_num=$(echo "$line" | cut -f1)
+
+    for spelling_error in $(echo $line | aspell list --dont-suggest); do
+      local spelling_errors_in_file=true
+      printf "${RED}x${NC}"
+      errors="${errors}\n${file}:${line_num} '${spelling_error}' has a spelling error!"
+    done
+  done
+
+  if [ $spelling_errors_in_file = true ]; then
+    return 1
+  fi
+
+  printf "${GREEN}.${NC}"
+  return 0
 }
 
 # Run through each function in the CHECKS array, passing each $file and
