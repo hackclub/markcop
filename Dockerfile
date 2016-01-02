@@ -1,7 +1,7 @@
-FROM gliderlabs/alpine:3.2
+FROM gliderlabs/alpine:3.3
 
-RUN apk --update add bash grep git perl aspell-en
-COPY bin/markcop /markcop/markcop
+RUN apk add --no-cache bash grep git perl aspell aspell-en
+COPY . /markcop
 WORKDIR /app
 
-ENTRYPOINT ["/markcop/markcop"]
+ENTRYPOINT ["/markcop/bin/markcop"]
