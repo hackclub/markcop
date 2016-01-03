@@ -1,7 +1,7 @@
-FROM progrium/busybox
+FROM gliderlabs/alpine:3.2
 
-RUN opkg-install bash grep git perl
-COPY bin/markcop /markcop/markcop
+RUN apk --update add bash grep git perl aspell-en
+COPY . /markcop
 WORKDIR /app
 
-ENTRYPOINT ["/markcop/markcop"]
+ENTRYPOINT ["/markcop/bin/markcop"]

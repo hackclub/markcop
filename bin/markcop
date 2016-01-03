@@ -15,6 +15,8 @@
 # issue!
 
 URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+LINK_LINE_REGEX='!?\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)'
+REFERENCE_LINK_REGEX='!?\[(.*?)\]\[(.*?)\]'
 HAS_ERROR=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -24,7 +26,9 @@ CHECKS=(trailing_whitespace
         header_missing_newline
         long_line
         missing_link
-        eof_newline)
+        eof_newline
+        spellcheck
+       )
 
 errors=''
 
@@ -45,6 +49,29 @@ cat <<'EOF'
 
 
 EOF
+
+# script_dir returns the directory that this script is in. Warning: if you cd to
+# a different directory before running this function, the result may not be
+# accurate.
+#
+# Modified from http://stackoverflow.com/a/246128
+function script_dir {
+  local source="${BASH_SOURCE[0]}"
+  local dir=""
+
+  # resolve $source until the file is no longer a symlink
+  while [ -h "$source" ]; do
+    dir="$( cd -P "$( dirname "$source" )" && pwd )"
+    source="$(readlink "$source")"
+    # if $source was a relative symlink, we need to resolve it relative to the
+    # path where the symlink file was located
+    [[ $source != /* ]] && source="$DIR/$source"
+  done
+
+  dir="$( cd -P "$( dirname "$source" )" && pwd )"
+
+  echo "$dir"
+}
 
 # Markdown checking functions
 
@@ -154,8 +181,7 @@ function long_line {
 
 function missing_link {
   file_name="$1"
-  link_line_regex='!?\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)'
-  for line in $(echo "$2" | grep -noP $link_line_regex); do
+  for line in $(echo "$2" | grep -noP "$LINK_LINE_REGEX"); do
     line_num=$(echo $line | cut -f1)
     dir=$(dirname "$file_name")
     link_dest=$(echo $line | sed 's/.*\[.*\](\(.*\))/\1/')
@@ -221,6 +247,63 @@ function eof_newline {
   else
     printf "${GREEN}.${NC}"
   fi
+}
+
+function spellcheck {
+  local file="$1"
+  local contents="$2"
+  local spelling_errors_in_file=false
+
+  local contents_without_code_blocks=$(
+    echo "$contents" |
+      # Remove ``` code blocks
+      sed '/```/,/```/d' |
+      # Remove inline code
+      perl -p0e 's/`.*?(\n\d+:)?.*?`/\1/g' |
+      # Remove inline HTML code tags
+      perl -p0e 's/<code>.*?<\/code>//g' |
+      # Remove code indented by 4 spaces
+      perl -p0e 's/[0-9]+:\n[0-9]+:    .*\n//g' |
+      # Replace regular Markdown links with just their link text (so we don't
+      # test filenames).
+      #
+      # We run this twice to catch links inside of links (like if you're making
+      # a clickable image). If you have links inside of links inside of links,
+      # you're out of luck (for the time being). It's hacky, but it works ;-).
+      perl -p0e "s/$LINK_LINE_REGEX/\1/g" |
+      perl -p0e "s/$LINK_LINE_REGEX/\1/g" |
+      # Replace reference links with just their link text
+      perl -p0e "s/$REFERENCE_LINK_REGEX/\1/g" |
+      # Remove HTML tags
+      perl -p0e 's/<.*?>(.*?)(<\/.*?>)?/\1/sg'
+        )
+
+  while read -r line; do
+    local line_num=$(echo "$line" | cut -f1)
+    local dict_path="$(script_dir)/../lib/dictionary"
+
+    for spelling_error in $(
+                           echo $line |
+                             aspell list \
+                                    --dont-suggest \
+                                    --extra-dicts $dict_path
+                         ); do
+      local spelling_errors_in_file=true
+      printf "${RED}x${NC}"
+      errors="${errors}\n${file}:${line_num} '${spelling_error}' is spelled incorrectly!"
+    done
+         # We use process substituion here to prevent the while loop from being
+         # run in a subshell, which prevents us from setting $errors for the
+         # entire program. See http://stackoverflow.com/a/4667725 for details.
+  done < <(echo "$contents_without_code_blocks" |
+              sed -e 's/:/\t/' -e 's/^#//' -e 's/`.*`//')
+
+  if [ $spelling_errors_in_file = true ]; then
+    return 1
+  fi
+
+  printf "${GREEN}.${NC}"
+  return 0
 }
 
 # Run through each function in the CHECKS array, passing each $file and
