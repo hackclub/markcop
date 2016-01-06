@@ -17,6 +17,8 @@
 URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 LINK_LINE_REGEX='!?\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)'
 REFERENCE_LINK_REGEX='!?\[(.*?)\]\[(.*?)\]'
+# The `[id]: http://example.com/` part of reference links
+REFERENCE_LINK_DEFINITION_REGEX='\[.*\]: .*'
 HAS_ERROR=false
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -274,6 +276,8 @@ function spellcheck {
       perl -p0e "s/$LINK_LINE_REGEX/\1/g" |
       # Replace reference links with just their link text
       perl -p0e "s/$REFERENCE_LINK_REGEX/\1/g" |
+      # Remove reference link definitions
+      sed -r "/^[0-9]+:${REFERENCE_LINK_DEFINITION_REGEX}\$/d" |
       # Remove HTML tags
       perl -p0e 's/<.*?>(.*?)(<\/.*?>)?/\1/sg'
         )
