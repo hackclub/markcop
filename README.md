@@ -5,7 +5,7 @@ Markcop is our friendly Markdown enforcer.
 ## Contributing
 
 To make your first contribution to a Hack Club repo, please read over
-[our contribution guidelines](https://github.com/hackedu/hackedu/blob/master/CONTRIBUTING.md).
+[our contribution guidelines](https://github.com/hackclub/hackclub/blob/master/CONTRIBUTING.md).
 
 The following is a guide for contributing a new markdown test to this repo.
 
