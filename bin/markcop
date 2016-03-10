@@ -26,7 +26,6 @@ NC='\033[0m'
 CHECKS=(trailing_whitespace
         malformed_header
         header_missing_newline
-        long_line
         missing_link
         eof_newline
         spellcheck
@@ -148,31 +147,6 @@ function header_missing_newline {
   done
 
   if [ $header_missing_newline_in_file = true ]; then
-    printf "${RED}x${NC}"
-    return 1
-  fi
-
-  printf "${GREEN}.${NC}"
-  return 0
-}
-
-function long_line {
-  file_name="$1"
-  long_line_in_file=false
-  long_line_regex='^[0-9]+:[^\|].{80,}[^\|]$'
-  for line in $(echo "$2" | grep -oP $long_line_regex | sed -e 's/:/\t/'); do
-    line_contents=$(echo $line | cut -f2)
-    # Check to make sure the line doesn't contain a link or HTML comment
-    html_comment_regex='^<!--.*-->$'
-    markdown_link_at_end_of_line_regex='\[.*\]\(.*\)\W*$'
-    if [[ ! $line_contents =~ $URL_REGEX && ! $line_contents =~ $html_comment_regex && ! $line_contents =~ $markdown_link_at_end_of_line_regex ]]; then
-      line_num=$(echo "$line" | cut -f1)
-      long_line_in_file=true
-      errors="${errors}\n${file_name}:${line_num} is over 80 chars!"
-    fi
-  done
-
-  if [ $long_line_in_file = true ]; then
     printf "${RED}x${NC}"
     return 1
   fi
