@@ -288,11 +288,21 @@ function spellcheck {
 # $contents
 for check in "${CHECKS[@]}"; do
   printf "\n\nRunning check: $check...\n"
-  for file in $(git ls-files | grep '\.md$'); do
-    content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
-    # $content is in the format file:line_number:line
-    $check "$file" "$content"
-  done
+  # If there are no arguments, check all markdown files in the current repo
+  if [ -z "$1" ]; then
+    for file in $(git ls-files | grep '\.md$'); do
+      content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
+      # $content is in the format file:line_number:line
+      $check "$file" "$content"
+    done
+    # If there are arguments, check each file passed in as an argument
+  else
+    for file in "$@"; do
+      content=$(grep -n "" $file | perl -0777 -pe 's/[0-9]+\:```.*?```//gs')
+      # $content is in the format file:line_number:line
+      $check "$file" "$content"
+    done
+  fi
 done
 
 >&2 printf "\n\n$errors\n"
