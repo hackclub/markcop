@@ -299,7 +299,7 @@ function run_check {
 for check in "${CHECKS[@]}"; do
   printf "\n\nRunning check: $check...\n"
   # If there are no arguments, check all markdown files in the current repo
-  if [ -z "$1" ]; then
+  if [ "$#" -eq 0 ]; then
     for file in $(git ls-files | grep '\.md$'); do
       run_check "$check" "$file"
     done
