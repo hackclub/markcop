@@ -4,13 +4,11 @@ Markcop is our friendly Markdown enforcer.
 
 ## Contributing
 
-To make your first contribution to a Hack Club repo, please read over
-[our contribution guidelines](https://github.com/hackclub/hackclub/blob/master/CONTRIBUTING.md).
+To make your first contribution to a Hack Club repo, please read over [our contribution guidelines](https://github.com/hackclub/hackclub/blob/master/CONTRIBUTING.md).
 
 The following is a guide for contributing a new markdown test to this repo.
 
-1. Add a function that takes the file name as the its first argument, and the
-   file contents as the second
+1. Add a function that takes the file name as the its first argument, and the file contents as the second
 
    ```bash
    # Markdown checking functions
@@ -55,8 +53,7 @@ Copy and paste the following into your terminal (must have Docker installed):
 
 ## Development
 
-Run the following to run Markcop in its Docker container in development (make
-sure to run this from the root of the repo):
+Run the following to run Markcop in its Docker container in development (make sure to run this from the root of the repo):
 
     docker run -v $(pwd):/app -v $(pwd):/markcop hackclub/markcop
 
