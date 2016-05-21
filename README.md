@@ -49,9 +49,13 @@ The following is a guide for contributing a new markdown test to this repo.
 
 ## Running It
 
-Copy and paste the following into your terminal (must have Docker installed):
+Copy and paste the following into your terminal to run Markcop on all of the Markdown in your current git repo (must have Docker installed):
 
     docker run -v $(pwd):/app hackclub/markcop
+
+If you'd like to only run Markcop on specific files, you can pass in the files to check as arguments. Example:
+
+    docker run -v $(pwd):/app hackclub/markcop README.md CONTRIBUTING.md
 
 ## Development
 
