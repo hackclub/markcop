@@ -1,6 +1,6 @@
 # `lib`
 
-This directory includes supplementary files for Markcop. This file includes an over of how to navigate and edit these.
+This directory includes supplementary files for Markcop. This file includes an overview of how to navigate and edit these.
 
 ## `dictionary`
 
