@@ -1,6 +1,29 @@
 # Markcop [![Circle CI](https://circleci.com/gh/hackclub/markcop.svg?style=svg)](https://circleci.com/gh/hackclub/markcop)
 
-Markcop is our friendly Markdown enforcer.
+Markcop is your one-stop shop for Markdown enforcing.
+
+Markcop iterates through all of the `.md` files in your git repository, checks them against a number of criteria, and outputs the results.
+
+The current checks are as follows:
+
+- No trailing whitespace
+- Properly formatted headings (`#`, not `=====` under a heading)
+- Headings should always be followed by new lines
+- Every relative link should be valid
+- There must be a blank new line at the end of each file (per POSIX guidelines)
+- Spell checking
+
+## Running It
+
+Markcop is a bash script and to prevent platform-specific issues, we recommend running Markcop with Docker.
+
+Copy and paste the following into your terminal to run Markcop on all of the Markdown in your current git repo (must have Docker installed):
+
+    docker run -v $(pwd):/app hackclub/markcop
+
+If you'd like to only run Markcop on specific files, you can pass in the files to check as arguments. Example:
+
+    docker run -v $(pwd):/app hackclub/markcop README.md CONTRIBUTING.md
 
 ## Contributing
 
@@ -44,18 +67,6 @@ The following is a guide for contributing a new markdown test to this repo.
            missing_link
            eof_newline)
    ```
-
-## Running It
-
-Copy and paste the following into your terminal to run Markcop on all of the Markdown in your current git repo (must have Docker installed):
-
-    docker run -v $(pwd):/app hackclub/markcop
-
-If you'd like to only run Markcop on specific files, you can pass in the files to check as arguments. Example:
-
-    docker run -v $(pwd):/app hackclub/markcop README.md CONTRIBUTING.md
-
-## Development
 
 Run the following to run Markcop in its Docker container in development (make sure to run this from the root of the repo):
 
