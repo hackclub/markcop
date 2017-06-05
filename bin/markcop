@@ -294,6 +294,30 @@ function run_check {
   $check "$file" "$content"
 }
 
+# Parse passed CLI options
+#
+# See https://stackoverflow.com/a/14203146 for where this code came from.
+while [[ "$#" -gt 1 ]]
+do
+  key="$1"
+
+  case "$key" in
+    # User can pass a comma separated list of check names to run a subset of the
+    # available checks.
+    -c|--checks)
+      # Split passed checks by comma and overwrite CHECKS array with them.
+      #
+      # See https://stackoverflow.com/a/10586169.
+      IFS="," read -r -a CHECKS <<< "$2"
+      shift
+      ;;
+    *)
+      # unknown option
+    ;;
+  esac
+  shift
+done
+
 # Run through each function in the CHECKS array, passing each $file and
 # $contents
 for check in "${CHECKS[@]}"; do
