@@ -14,11 +14,7 @@ If a word is uppercase, `aspell` assumes that only the uppercase version of the 
 
 ### Adding a New Word to the Dictionary
 
-Run the following command in this directory, replacing `ORPHEUS` with the actual word you want to add. Quick note: you may have to run these commands in Docker (the output may vary in Linux or OSX).
-
-If you experince issues with these commands, run them in docker using the command:
-
-`$ docker run -v $(pwd):/app hackclub/markcop`
+Run the following command in this directory, replacing `ORPHEUS` with the actual word you want to add. 
 
 ```sh
 $ echo "ORPHEUS" >> dictionary
