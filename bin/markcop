@@ -270,7 +270,7 @@ function spellcheck {
       printf "${RED}x${NC}"
       errors="${errors}\n${file}:${line_num} '${spelling_error}' is spelled incorrectly!"
     done
-         # We use process substituion here to prevent the while loop from being
+         # We use process substitution here to prevent the while loop from being
          # run in a subshell, which prevents us from setting $errors for the
          # entire program. See http://stackoverflow.com/a/4667725 for details.
   done < <(echo "$contents_without_code_blocks" |
