@@ -21,4 +21,4 @@ $ echo "ORPHEUS" >> dictionary
 $ (head -n 1 dictionary && tail -n +2 dictionary | LC_ALL=C sort -u) > dictionary.sorted && mv dictionary.sorted dictionary
 ```
 
-If you'd like to use a different method to add a word to the dictionary, the important thing to know is that you should use the Unix command `sort -u` to sort the word list. Words should be sorted (A-Z),(a-z) so that AB > Aa
+If you'd like to use a different method to add a word to the dictionary, the important thing to know is that it should follow the same sorting method already used in the dictionary to reduce merge conflicts.
