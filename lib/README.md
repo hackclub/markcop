@@ -18,7 +18,7 @@ Run the following command in this directory, replacing `ORPHEUS` with the actual
 
 ```sh
 $ echo "ORPHEUS" >> dictionary
-$ (head -n 1 dictionary && LCtail -n +2 dictionary | LC_ALL=C sort -u) > dictionary.sorted && mv dictionary.sorted dictionary
+$ (head -n 1 dictionary && tail -n +2 dictionary | LC_ALL=C sort -u) > dictionary.sorted && mv dictionary.sorted dictionary
 ```
 
 If you'd like to use a different method to add a word to the dictionary, the important thing to know is that you should use the Unix command `sort -u` to sort the word list. Words should be sorted (A-Z),(a-z) so that AB > Aa
