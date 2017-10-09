@@ -14,11 +14,11 @@ If a word is uppercase, `aspell` assumes that only the uppercase version of the 
 
 ### Adding a New Word to the Dictionary
 
-Run the following command in this directory, replacing `ORPHEUS` with the actual word you want to add. Quick note: you must run these commands on Linux. The output will be different on OS X.
+Run the following command in this directory, replacing `ORPHEUS` with the actual word you want to add. 
 
 ```sh
 $ echo "ORPHEUS" >> dictionary
-$ (head -n 1 dictionary && tail -n +2 dictionary | sort -u) > dictionary.sorted && mv dictionary.sorted dictionary
+$ (head -n 1 dictionary && tail -n +2 dictionary | LC_ALL=C sort -u) > dictionary.sorted && mv dictionary.sorted dictionary
 ```
 
-If you'd like to use a different method to add a word to the dictionary, the important thing to know is that you should use the Unix command `sort -u` to sort the word list.
+If you'd like to use a different method to add a word to the dictionary, the important thing to know is that you should use the Unix command `sort -u` to sort the word list. Words should be sorted (A-Z),(a-z) so that AB > Aa
