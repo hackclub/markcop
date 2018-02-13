@@ -232,7 +232,7 @@ function spellcheck {
   local contents_without_code_blocks=$(
     echo "$contents" |
       # Remove frontmatter
-      perl -p0e 's/^---\n(\w+: .+\n)+---//g' |
+      perl -p0e 's/^\d+:---\n(\d+:\w+: .+\n)+\d+:---//g' |
       # Remove ``` code blocks
       sed '/```/,/```/d' |
       # Remove inline code
@@ -256,6 +256,8 @@ function spellcheck {
       # Remove HTML tags
       perl -p0e 's/<.*?>(.*?)(<\/.*?>)?/\1/sg'
         )
+
+  echo "$contents_without_code_blocks"
 
   while read -r line; do
     local line_num=$(echo "$line" | cut -f1)
