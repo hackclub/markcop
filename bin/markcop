@@ -257,8 +257,6 @@ function spellcheck {
       perl -p0e 's/<.*?>(.*?)(<\/.*?>)?/\1/sg'
         )
 
-  echo "$contents_without_code_blocks"
-
   while read -r line; do
     local line_num=$(echo "$line" | cut -f1)
     local dict_path="$(script_dir)/../lib/dictionary"
