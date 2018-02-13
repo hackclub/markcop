@@ -232,6 +232,8 @@ function spellcheck {
 
   local contents_without_code_blocks=$(
     echo "$contents" |
+      # Remove frontmatter
+      sed '/^---$/,/^---$/d' |
       # Remove ``` code blocks
       sed '/```/,/```/d' |
       # Remove inline code
