@@ -232,7 +232,7 @@ function spellcheck {
   local contents_without_code_blocks=$(
     echo "$contents" |
       # Remove frontmatter
-      sed '/^---$/,/^---$/d' |
+      perl -p0e 's/^---\n(\w+: .+\n)+---//g' |
       # Remove ``` code blocks
       sed '/```/,/```/d' |
       # Remove inline code
