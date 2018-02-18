@@ -2,6 +2,12 @@ machine:
   services:
     - docker
 
+experimental:
+  notify:
+    branches:
+      only:
+        - master
+
 dependencies:
   override:
     - docker info
