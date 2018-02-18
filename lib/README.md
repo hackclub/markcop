@@ -22,3 +22,12 @@ $ (head -n 1 dictionary && tail -n +2 dictionary | LC_ALL=C sort -u) > dictionar
 ```
 
 If you'd like to use a different method to add a word to the dictionary, the important thing to know is that it should follow the same sorting method already used in the dictionary to reduce merge conflicts.
+Pico
+Lua
+tilemaps
+spritesheet
+DRM
+fullscreen
+boolean
+booleans
+SFX
