@@ -3,6 +3,7 @@ AIME
 AMC
 API
 APIs
+ATmega
 Aaroh
 Abenezer
 AdVenture
@@ -74,6 +75,7 @@ Cranbrook
 Ctrl
 DDoS
 DECA
+DHT
 DOM
 DOckerize
 DRM
@@ -91,6 +93,7 @@ Dockerize
 Doo
 DownToZork
 Dropbox
+EEPROM
 EIN
 EasyCTF
 EasyCTF's
@@ -103,6 +106,7 @@ Escapa
 Eventbrite
 FBLA
 FGL
+FTDI
 Firebase
 Firebase's
 Flappy
@@ -114,6 +118,7 @@ Fu
 GAHS
 GIF
 GIFs
+GND
 GParted
 GWC
 Gaberiel
@@ -123,6 +128,7 @@ Gaim
 Gambino
 Gaybrick
 Gemma
+Genuino
 Geoff
 Giphy
 Git's
@@ -152,8 +158,10 @@ Howdy's
 Hubot
 Hubot's
 Hurray
+ICSP
 IDE
 IMVU
+IOREF
 IRC
 Imgur
 Instagram
@@ -254,6 +262,7 @@ PR
 PRs
 PSAT
 PTTs
+PWM
 Pac
 Packrat
 PagerDuty
@@ -296,6 +305,7 @@ SLHS
 SMS
 SOOOOOOOOOOOOOOOOOOOOOOOOO
 SQLite
+SRAM
 SSHTron
 Salman
 Samay
@@ -355,6 +365,7 @@ UX
 Udit
 Udit's
 Unetbootin
+Uno
 Urbain
 VC
 VPN
@@ -417,6 +428,7 @@ bolding
 boolean
 booleans
 bootcamp
+bootloader
 cancelled
 casper
 changemaking
@@ -526,6 +538,7 @@ livestreaming
 login
 los
 lowell
+mA
 macOS
 malware
 markcop
@@ -540,6 +553,7 @@ metatable
 metatables
 mhesby
 microaggressions
+microcontroller
 mockup
 mortem
 mortems
@@ -561,6 +575,7 @@ onboarded
 onboarding
 orgs
 overcommunicate
+overcurrent
 packrat
 paked
 paked's
@@ -583,6 +598,7 @@ redownload
 relatable
 repo
 repos
+resettable
 resize
 resized
 resizing
