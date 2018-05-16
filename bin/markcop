@@ -13,7 +13,7 @@
 # run into any issues or have any comments/questions/concerns, please file an
 # issue!
 
-URL_REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+URL_REGEX='(https?|ftp|file|chrome)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 LINK_LINE_REGEX='!?\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)'
 REFERENCE_LINK_REGEX='!?\[(.*?)\]\[(.*?)\]'
 # The `[id]: http://example.com/` part of reference links
