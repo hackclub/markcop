@@ -1,5 +1,4 @@
 personal_ws-1.1 en 0
-
 AIME
 AMC
 API
@@ -14,6 +13,7 @@ Airbnb's
 Airtable
 Akaanksh
 Aleksic
+Alexa
 AngelList
 Angeles
 AngularJS
@@ -22,6 +22,7 @@ Antrim
 Arduino
 Armijo
 Arys
+Astro
 Athul
 Avi
 BAM
@@ -70,6 +71,7 @@ CodeHS
 CodeNow
 Codecademy
 Codestarter
+CoinBlock
 Combinator
 Comcast
 Costa
@@ -286,6 +288,7 @@ PennApps
 Phaser
 Photoshop
 Pico
+Pinta
 Pipedrive
 PostgreSQL
 PowerPoint
@@ -313,6 +316,7 @@ Redis
 RetroPie
 Rica
 Rohith
+Rollup
 Romanoff
 Rossmann
 SEO
@@ -371,8 +375,10 @@ Tiglao
 Timeline
 ToDo
 Treehouse
+Tumblr
 Twilio
 UI
+UIs
 UPenn's
 USBs
 USC
@@ -398,6 +404,7 @@ WASD
 WIP
 WIRED's
 WSJ
+Webpack
 Webpages
 Werner
 Wishlist
@@ -449,12 +456,14 @@ boolean
 booleans
 bootcamp
 bootloader
+bundler
 cancelled
 casper
 changemaking
 cheatsheet
 checkbox
 checkboxes
+clicky
 codebase
 config
 could've
@@ -484,6 +493,7 @@ dropdown
 egotiable
 else's
 estable
+ethernet
 etherpad
 ethnicities
 externalities
@@ -495,6 +505,7 @@ filename
 filenames
 filesystem
 financials
+flexbox
 flyer
 flyers
 fo'shizzle
@@ -529,6 +540,7 @@ hellyeah
 hm
 iOS
 ideation
+ifconfig
 immersive
 inbox
 incrementation
@@ -549,12 +561,14 @@ jsbinctl
 jumbotron
 jumpstarted
 kanban
+keyframes
 kinesthetic
 lifecycle
 lightheadedness
 likeminded
 linebreak
 livestreaming
+localhost
 login
 los
 lowell
@@ -575,11 +589,13 @@ mhesby
 microaggressions
 microcontroller
 middleware
+minified
 mockup
 mortem
 mortems
 multi
 multiplayer
+nathanielthealligator
 nbsp
 nd
 ndependent
@@ -588,6 +604,7 @@ newfound
 nguyenbrian
 nitty
 nonexistant
+npm
 octothorpe
 ok
 olds
@@ -610,14 +627,17 @@ popup
 por
 pre
 preload
+preloaded
 px
 que
 quo
 radians
+raspi
 rd
 recused
 redownload
 relatable
+repl
 repo
 repos
 resettable
@@ -657,11 +677,14 @@ standups
 starthackclub
 startup
 startups
+stateful
 stimable
 styleguide
 styleguides
 stylesheet
 stylings
+subcomponents
+subdirectory
 subdomain
 subreddit
 techy
@@ -710,6 +733,7 @@ walkthrough
 webform
 webpage
 webpages
+webserver
 welcomers
 whitespace
 wifi
