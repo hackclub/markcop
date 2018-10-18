@@ -46,7 +46,6 @@ Bumpteroids
 Busoni
 Buzzfeed
 CAPTCHA
-camelCase
 CDN
 CDN's
 CEOs
@@ -81,6 +80,7 @@ Ctrl
 DDoS
 DECA
 DHT
+DNS
 DOM
 DOckerize
 DRM
@@ -95,7 +95,6 @@ Dholakiya
 DirectTV
 Distro
 Django
-DNS
 Dockerize
 Doo
 DownToZork
@@ -254,7 +253,6 @@ MySQL
 Myo
 NCWIT
 NEO
-Netlify
 NFC
 NOOBS
 NPM
@@ -263,6 +261,7 @@ NTFS
 NYT
 NYU
 Nada
+Netlify
 Nikolas
 NoSQL
 NodeJS
@@ -464,6 +463,7 @@ booleans
 bootcamp
 bootloader
 bundler
+camelCase
 cancelled
 casper
 changemaking
@@ -499,6 +499,7 @@ dr
 dropdown
 egotiable
 else's
+esc
 estable
 ethernet
 etherpad
